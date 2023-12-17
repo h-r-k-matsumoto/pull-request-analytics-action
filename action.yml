@@ -10,7 +10,10 @@ inputs:
     required: true
   GITHUB_OWNERS_REPOS:
     description: "Github owner/repository list separated by comma"
-    required: true
+    required: false
+  GITHUB_OWNERS:
+    description: "Github owners list separated by comma"
+    required: false
   GITHUB_REPO_FOR_ISSUE:
     description: "Github repo for issue"
     required: true

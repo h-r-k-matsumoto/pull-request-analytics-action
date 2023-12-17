@@ -4,6 +4,7 @@ import * as core from "@actions/core";
 import { createMarkdown } from "./view";
 import {
   createIssue,
+  getOrgRepositories,
   getOwnersRepositories,
   makeComplexRequest,
 } from "./requests";
@@ -20,8 +21,9 @@ async function main() {
       !process.env.GITHUB_OWNER_FOR_ISSUE) &&
       (!core.getInput("GITHUB_OWNER_FOR_ISSUE") ||
         !core.getInput("GITHUB_REPO_FOR_ISSUE"))) ||
-    (!core.getInput("GITHUB_OWNERS_REPOS") &&
+    ((!core.getInput("GITHUB_OWNERS_REPOS") &&
       !process.env.GITHUB_OWNERS_REPOS) ||
+      !core.getInput("GITHUB_OWNERS")) &&
     (!core.getInput("GITHUB_TOKEN") && !process.env.GITHUB_TOKEN)
   ) {
     throw new Error("Missing required variables");
@@ -32,7 +34,8 @@ async function main() {
     rateLimitAtBeginning.data.rate.remaining
   );
 
-  const ownersRepos = getOwnersRepositories();
+  console.log(`GITHUB_OWNERS=${ core.getInput("GITHUB_OWNERS")}`);
+  const ownersRepos = core.getInput("GITHUB_OWNERS") ? await getOrgRepositories() : getOwnersRepositories();
   console.log("Initiating data request.");
   const data = [];
   for (let i = 0; i < ownersRepos.length; i++) {

@@ -803,14 +803,16 @@ async function main() {
         !process.env.GITHUB_OWNER_FOR_ISSUE) &&
         (!core.getInput("GITHUB_OWNER_FOR_ISSUE") ||
             !core.getInput("GITHUB_REPO_FOR_ISSUE"))) ||
-        (!core.getInput("GITHUB_OWNERS_REPOS") &&
+        ((!core.getInput("GITHUB_OWNERS_REPOS") &&
             !process.env.GITHUB_OWNERS_REPOS) ||
-        (!core.getInput("GITHUB_TOKEN") && !process.env.GITHUB_TOKEN)) {
+            !core.getInput("GITHUB_OWNERS")) &&
+            (!core.getInput("GITHUB_TOKEN") && !process.env.GITHUB_TOKEN)) {
         throw new Error("Missing required variables");
     }
     const rateLimitAtBeginning = await octokit_1.octokit.rest.rateLimit.get();
     console.log("RATE LIMIT REMAINING BEFORE REQUESTS: ", rateLimitAtBeginning.data.rate.remaining);
-    const ownersRepos = (0, requests_1.getOwnersRepositories)();
+    console.log(`GITHUB_OWNERS=${core.getInput("GITHUB_OWNERS")}`);
+    const ownersRepos = core.getInput("GITHUB_OWNERS") ? await (0, requests_1.getOrgRepositories)() : (0, requests_1.getOwnersRepositories)();
     console.log("Initiating data request.");
     const data = [];
     for (let i = 0; i < ownersRepos.length; i++) {
@@ -1046,6 +1048,34 @@ exports.getDataWithThrottle = getDataWithThrottle;
 
 /***/ }),
 
+/***/ 63916:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getOrgRepositories = void 0;
+const utils_1 = __nccwpck_require__(41002);
+const octokit_1 = __nccwpck_require__(24641);
+const getOrgRepositories = async () => {
+    let repositories = [];
+    for (let orgName of (0, utils_1.getMultipleValuesInput)("GITHUB_OWNERS")) {
+        let listForOrg = await octokit_1.octokit.paginate(octokit_1.octokit.rest.repos.listForOrg, { org: orgName });
+        listForOrg.forEach(r => console.log(`${r.owner.login} ---- ${r.archived}`));
+        listForOrg = listForOrg.filter((r) => !r.archived);
+        repositories = repositories.concat(listForOrg.map((r) => [r.owner.login, r.name]));
+        console.log(`repositories length = ${repositories.length}`);
+    }
+    for (let r of repositories) {
+        console.log(`r=${r[0]}\t${r[1]}`);
+    }
+    return repositories;
+};
+exports.getOrgRepositories = getOrgRepositories;
+
+
+/***/ }),
+
 /***/ 92041:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
@@ -1200,9 +1230,11 @@ exports.getPullRequests = getPullRequests;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.createIssue = exports.makeComplexRequest = exports.getOwnersRepositories = void 0;
+exports.createIssue = exports.makeComplexRequest = exports.getOrgRepositories = exports.getOwnersRepositories = void 0;
 var getOwnersRepositories_1 = __nccwpck_require__(57288);
 Object.defineProperty(exports, "getOwnersRepositories", ({ enumerable: true, get: function () { return getOwnersRepositories_1.getOwnersRepositories; } }));
+var getOrgRepositories_1 = __nccwpck_require__(63916);
+Object.defineProperty(exports, "getOrgRepositories", ({ enumerable: true, get: function () { return getOrgRepositories_1.getOrgRepositories; } }));
 var makeComplexRequest_1 = __nccwpck_require__(99378);
 Object.defineProperty(exports, "makeComplexRequest", ({ enumerable: true, get: function () { return makeComplexRequest_1.makeComplexRequest; } }));
 var createIssue_1 = __nccwpck_require__(5891);
