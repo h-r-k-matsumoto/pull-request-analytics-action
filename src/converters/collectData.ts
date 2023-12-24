@@ -24,7 +24,7 @@ export const collectData = (
       ? parseISO(pullRequest.closed_at)
       : null;
 
-    const dateKey = closedDate ? format(closedDate, "M/y") : "invalidDate";
+    const dateKey = closedDate ? format(closedDate, "y") : "invalidDate";
 
     const userKey = pullRequest.user?.login || invalidUserLogin;
     if (!collection[userKey]) {

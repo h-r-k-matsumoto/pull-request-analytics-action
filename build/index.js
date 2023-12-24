@@ -77,7 +77,7 @@ const collectData = (data) => {
         const closedDate = pullRequest.closed_at
             ? (0, date_fns_1.parseISO)(pullRequest.closed_at)
             : null;
-        const dateKey = closedDate ? (0, date_fns_1.format)(closedDate, "M/y") : "invalidDate";
+        const dateKey = closedDate ? (0, date_fns_1.format)(closedDate, "y") : "invalidDate";
         const userKey = pullRequest.user?.login || constants_1.invalidUserLogin;
         if (!collection[userKey]) {
             collection[userKey] = {};
@@ -2138,7 +2138,7 @@ const sortCollectionsByDate = (collections) => Object.keys(collections)
         return 1;
     if (b === "total")
         return -1;
-    return (0, date_fns_1.isBefore)((0, date_fns_1.parse)(a, "M/y", new Date()), (0, date_fns_1.parse)(b, "M/y", new Date()))
+    return (0, date_fns_1.isBefore)((0, date_fns_1.parse)(a, "y", new Date()), (0, date_fns_1.parse)(b, "y", new Date()))
         ? 1
         : -1;
 });
